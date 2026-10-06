@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Mohsin Dental Clinic design system — "Enamel Pop".
+ * Anton display type, Inter body, JetBrains Mono labels.
+ * Teal primary with warm coral accent on a cool off-white ground.
+ */
+
+@theme inline {
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+  --font-mono: var(--font-mono-family);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --animate-rise: rise 0.7s var(--ease-smooth) both;
+  --animate-pop: pop 0.5s var(--ease-smooth) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+:root {
+  --radius: 0.75rem;
+  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --font-display-family: "Anton", sans-serif;
+  --font-body-family: "Inter", sans-serif;
+  --font-mono-family: "JetBrains Mono", monospace;
+
+  --background: oklch(0.971 0.006 210.5);
+  --foreground: oklch(0.223 0.029 233.8);
+  --surface: oklch(1 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.223 0.029 233.8);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.223 0.029 233.8);
+  --primary: oklch(0.704 0.121 184.3);
+  --primary-foreground: oklch(1 0 0);
+  --primary-deep: oklch(0.577 0.103 183.7);
+  --secondary: oklch(0.955 0.011 205);
+  --secondary-foreground: oklch(0.223 0.029 233.8);
+  --muted: oklch(0.955 0.011 205);
+  --muted-foreground: oklch(0.51 0.021 219.6);
+  --accent: oklch(0.694 0.183 37.6);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.917 0.011 205.6);
+  --input: oklch(0.917 0.011 205.6);
+  --ring: oklch(0.704 0.121 184.3);
+}
+
+@utility lift-card {
+  transition:
+    transform 0.25s var(--ease-smooth),
+    box-shadow 0.25s var(--ease-smooth);
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px -20px oklch(0.223 0.029 233.8 / 0.35);
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body-family);
+  }
+}
