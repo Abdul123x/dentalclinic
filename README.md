@@ -9,7 +9,7 @@ https://mydomain.com/admin                      ← you create/edit/publish demo
 ```
 
 Stack: Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · MongoDB + Mongoose · Zod · jose (session cookies) · Cloudinary (optional uploads).
-The template keeps the original "Enamel Pop" design (Anton / Inter / JetBrains Mono, rounded cards, chatbot, WhatsApp booking).
+The clinic template uses the "Clinical Editorial" design: Newsreader serif headlines, Figtree body text, warm paper background, ink sections, square corners, a utility bar, a numbered treatment list, a mobile Call / WhatsApp / Book bar, and a chatbot. Brand colours from the admin are used for buttons and accents. Styles are scoped to `.site` in `globals.css`, and shared class names live in `src/components/template/ui.ts`.
 
 ---
 

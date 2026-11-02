@@ -118,8 +118,8 @@ export function ColorInput({ label, value, onChange, error }: { label: string; v
   );
 }
 
-/** Uploads straight to Cloudinary using a server-issued signature. */
-async function uploadToCloudinary(file: File, folder: string) {
+/** Optional: uploads straight to Cloudinary when it's configured (server-issued signature). */
+async function uploadToCloudinary(file: Blob, folder: string) {
   const signRes = await fetch("/api/upload/sign", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -136,8 +136,55 @@ async function uploadToCloudinary(file: File, folder: string) {
   const res = await fetch(`https://api.cloudinary.com/v1_1/${s.cloudName}/image/upload`, { method: "POST", body: fd });
   const json = (await res.json()) as { secure_url?: string; error?: { message: string } };
   if (!res.ok || !json.secure_url) throw new Error(json.error?.message ?? "Upload failed");
-  // Ask Cloudinary for auto format/quality to keep pages fast.
   return json.secure_url.replace("/upload/", "/upload/f_auto,q_auto/");
+}
+
+/** Default: stores the image in our own MongoDB — no extra account or links needed. */
+async function uploadToDatabase(file: Blob, folder: string) {
+  const fd = new FormData();
+  fd.append("file", file, "image");
+  fd.append("folder", folder);
+  const res = await fetch("/api/upload", { method: "POST", body: fd });
+  const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+  if (res.status === 401) throw new Error("Your login expired — please log in again.");
+  if (!res.ok || !json.url) throw new Error(json.error ?? "Upload failed");
+  return json.url;
+}
+
+/**
+ * Shrinks a phone photo (often 5–10 MB) to a web-friendly size in the browser before uploading.
+ * PNGs stay PNG (keeps logo transparency); everything else becomes JPEG.
+ */
+async function compressImage(file: File, maxDim: number): Promise<Blob> {
+  if (file.type === "image/gif" || file.type === "image/svg+xml") return file;
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("This image couldn't be read. Try a JPG or PNG."));
+      el.src = url;
+    });
+    const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.round(img.naturalWidth * scale);
+    const h = Math.round(img.naturalHeight * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    const keepPng = file.type === "image/png";
+    if (!keepPng) {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.drawImage(img, 0, 0, w, h);
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, keepPng ? "image/png" : "image/jpeg", 0.84));
+    if (!blob) return file;
+    return blob.size < file.size || scale < 1 ? blob : file;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 export function ImageInput({
@@ -149,28 +196,36 @@ export function ImageInput({
   error,
   hint,
   aspect = "aspect-[4/3]",
+  maxDim = 1800,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  /** true when Cloudinary is configured; otherwise images are stored in MongoDB. */
   uploadsEnabled: boolean;
   folder: string;
   error?: string;
   hint?: string;
   aspect?: string;
+  maxDim?: number;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [showLink, setShowLink] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
   async function onFile(file: File | undefined) {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return setUploadError("Please choose an image file.");
-    if (file.size > 10 * 1024 * 1024) return setUploadError("Image must be under 10 MB.");
+    if (!file.type.startsWith("image/")) return setUploadError("Please choose a photo (JPG, PNG or WebP).");
+    if (file.size > 25 * 1024 * 1024) return setUploadError("That photo is over 25 MB — please pick a smaller one.");
     setBusy(true);
     setUploadError("");
     try {
-      onChange(await uploadToCloudinary(file, folder || "misc"));
+      const small = await compressImage(file, maxDim);
+      if (small.size > 4 * 1024 * 1024) throw new Error("Image is still over 4 MB after compressing. Try another photo.");
+      const url = uploadsEnabled ? await uploadToCloudinary(small, folder || "misc") : await uploadToDatabase(small, folder || "misc");
+      onChange(url);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -179,53 +234,95 @@ export function ImageInput({
     }
   }
 
+  const msg = error || uploadError;
+
   return (
     <div className="block">
       <span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>
       <div className="flex gap-3">
-        <div className={`relative w-28 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border ${aspect}`}>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            onFile(e.dataTransfer.files?.[0]);
+          }}
+          title="Click or drop a photo"
+          className={`group relative w-32 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 transition ${aspect} ${
+            dragging ? "ring-2 ring-primary" : msg ? "ring-destructive" : "ring-border hover:ring-primary"
+          }`}
+        >
           {value ? (
-            <img src={value} alt="" className="absolute inset-0 size-full object-cover" />
+            <>
+              <img src={value} alt="" className="absolute inset-0 size-full object-cover" />
+              <span className="absolute inset-0 grid place-items-center bg-black/45 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                Change
+              </span>
+            </>
           ) : (
-            <div className="absolute inset-0 grid place-items-center text-muted-foreground">
+            <span className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 p-2 text-center text-muted-foreground">
               <ImageIcon className="size-6" />
-            </div>
+              <span className="text-[11px] leading-tight font-medium">Click or drop photo</span>
+            </span>
           )}
-        </div>
+          {busy && (
+            <span className="absolute inset-0 grid place-items-center bg-background/70">
+              <Loader2 className="size-6 animate-spin text-primary" />
+            </span>
+          )}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
+
         <div className="min-w-0 flex-1 space-y-2">
-          <input
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="https://… (leave empty for default)"
-            className={`${inputCls} ${error ? "ring-destructive" : ""}`}
-          />
           <div className="flex flex-wrap gap-2">
-            {uploadsEnabled && (
-              <>
-                <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => fileRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary-deep hover:bg-primary/20 disabled:opacity-60"
-                >
-                  {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
-                  {busy ? "Uploading…" : "Upload"}
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => fileRef.current?.click()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-deep disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+              {busy ? "Uploading…" : value ? "Replace photo" : "Choose photo"}
+            </button>
             {value && (
               <button
                 type="button"
                 onClick={() => onChange("")}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground ring-1 ring-border hover:text-foreground"
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium text-muted-foreground ring-1 ring-border hover:text-foreground"
               >
-                <X className="size-3.5" /> Clear
+                <X className="size-3.5" /> Remove
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => setShowLink((v) => !v)}
+              className="px-1 py-2 text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              {showLink ? "Hide link" : "Use a link instead"}
+            </button>
           </div>
-          {(error || uploadError) && <p className="text-xs text-destructive">{error || uploadError}</p>}
-          {!error && !uploadError && hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+          {showLink && (
+            <input
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="https://… (optional)"
+              className={`${inputCls} ${error ? "ring-destructive" : ""}`}
+            />
+          )}
+          {msg ? (
+            <p className="text-xs text-destructive">{msg}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {hint ? `${hint} ` : ""}JPG or PNG from your phone or computer — it&apos;s resized automatically.
+            </p>
+          )}
         </div>
       </div>
     </div>

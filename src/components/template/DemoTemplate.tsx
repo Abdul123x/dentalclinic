@@ -3,10 +3,11 @@ import { getGoogleReviews } from "@/lib/google-reviews";
 import type { Demo } from "@/lib/validation";
 import { About } from "./About";
 import { Contact } from "./Contact";
-import { CTA } from "./CTA";
 import { Doctors } from "./Doctors";
+import { FAQ } from "./FAQ";
 import { Gallery } from "./Gallery";
 import { Hero } from "./Hero";
+import { Process } from "./Process";
 import { Services } from "./Services";
 import { Testimonials } from "./Testimonials";
 import { WhyChooseUs } from "./WhyChooseUs";
@@ -22,13 +23,14 @@ export async function DemoTemplate({ demo, basePath }: { demo: Demo; basePath: s
   return (
     <>
       <Hero data={d} />
+      <WhyChooseUs data={d.whyChooseUs} businessName={d.businessName} />
       <Services data={d.services} basePath={basePath} />
       <About data={d} />
-      <WhyChooseUs data={d.whyChooseUs} businessName={d.businessName} />
       <Doctors data={d} />
+      <Process data={d} />
       <Testimonials data={d} live={live} />
       <Gallery images={d.galleryImages} businessName={d.businessName} />
-      <CTA data={d} />
+      <FAQ data={d} />
       <Contact data={d} />
     </>
   );

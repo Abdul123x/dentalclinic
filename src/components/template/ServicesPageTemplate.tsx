@@ -1,111 +1,118 @@
 import Link from "next/link";
-import { MessageCircle, Phone } from "lucide-react";
 
 import { resolveDemo } from "@/lib/defaults";
-import { getIcon } from "@/lib/icons";
 import { slugify } from "@/lib/slug";
 import type { Demo } from "@/lib/validation";
 import { telLink, whatsappLink } from "@/lib/whatsapp";
-import { Reveal } from "./Reveal";
+import { btnOutlineLight, btnPrimary, container, eyebrowLight, textLink } from "./ui";
 
-/** Detailed services page (/demo/[slug]/services) — same template for every demo. */
+/** Detailed treatments page (/demo/[slug]/services) — same template for every demo. */
 export function ServicesPageTemplate({ demo, basePath }: { demo: Demo; basePath: string }) {
   const d = resolveDemo(demo);
   return (
     <>
-      <section className="mx-auto max-w-6xl px-5 pt-14 pb-10">
-        <div className="animate-rise">
-          <div className="mb-3 font-mono text-xs tracking-widest text-primary">
-            OUR SERVICES · {d.services.length} TREATMENTS
-          </div>
-          <h1 className="max-w-4xl text-balance font-display text-[clamp(3rem,8vw,6rem)] leading-[0.9] tracking-tight">
-            Every treatment, <span className="text-primary">explained.</span>
-          </h1>
-          <p className="mt-5 max-w-[60ch] text-pretty text-lg text-muted-foreground">
-            What each treatment at {d.businessName} involves — so you can decide with confidence.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-2">
-            {d.services.map((s, i) => {
-              const Icon = getIcon(s.icon);
-              return (
-                <a
-                  key={`${s.title}-${i}`}
-                  href={`#${slugify(s.title)}`}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-muted-foreground ring-1 ring-border transition-colors hover:text-primary hover:ring-primary/40"
-                >
-                  <Icon className="size-3.5" /> {s.title}
-                </a>
-              );
-            })}
+      <section className="border-b border-border bg-paper">
+        <div className={`${container} py-14 md:py-20`}>
+          <nav aria-label="Breadcrumb" className="text-[13px] text-muted-foreground">
+            <Link href={basePath} className="hover:text-foreground">
+              Home
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-foreground">Treatments</span>
+          </nav>
+          <div className="mt-8 grid gap-8 lg:grid-cols-12">
+            <h1 className="text-[clamp(2.6rem,6vw,4.5rem)] leading-[1.02] lg:col-span-7">Treatments at {d.businessName}</h1>
+            <p className="self-end text-[17px] leading-relaxed text-muted-foreground lg:col-span-5">
+              What each treatment involves, how long it takes and what to expect afterwards. Not sure what you need? Book a
+              check-up and we&apos;ll explain your options.
+            </p>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl space-y-5 px-5 pb-16">
-        {d.services.map((s, i) => {
-          const Icon = getIcon(s.icon);
-          const wa = whatsappLink(d.whatsapp, `Assalam o Alaikum, I'd like to ask about ${s.title} at ${d.businessName}.`);
-          return (
-            <Reveal key={`${s.title}-${i}`}>
-              <article id={slugify(s.title)} className="scroll-mt-24 rounded-[28px] bg-surface p-6 ring-1 ring-border md:p-8">
-                <div className="grid gap-6 md:grid-cols-12">
-                  <div className="md:col-span-4">
-                    <div
-                      className={`mb-5 grid size-14 place-items-center rounded-2xl ${
-                        i % 2 === 0 ? "bg-primary/15 text-primary-deep" : "bg-accent/15 text-accent"
-                      }`}
-                    >
-                      <Icon className="size-7" />
-                    </div>
-                    <h2 className="font-display text-3xl tracking-tight md:text-4xl">{s.title}</h2>
-                    <p className="mt-2 text-sm font-medium text-primary-deep">{s.description}</p>
-                  </div>
-                  <div className="md:col-span-8">
-                    <div className="space-y-3 text-pretty text-sm leading-relaxed text-muted-foreground md:text-base">
-                      {(s.details || s.description).split(/\n{2,}/).map((p, j) => (
-                        <p key={j}>{p}</p>
-                      ))}
-                    </div>
-                    <div className="mt-6 flex flex-wrap gap-2">
-                      {wa && (
-                        <a
-                          href={wa}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground hover:opacity-90"
-                        >
-                          <MessageCircle className="size-4" /> Ask / Book
+      <div className={`${container} grid gap-12 py-16 md:py-20 lg:grid-cols-12`}>
+        {/* Index */}
+        <aside className="lg:col-span-3">
+          <div className="lg:sticky lg:top-32">
+            <p className="text-[12px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+              {d.services.length} treatments
+            </p>
+            <ol className="mt-4 flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-0 lg:overflow-visible lg:border-t lg:border-border lg:pb-0">
+              {d.services.map((s, i) => (
+                <li key={`${s.title}-${i}`} className="shrink-0 lg:border-b lg:border-border">
+                  <a
+                    href={`#${slugify(s.title)}`}
+                    className="block rounded-[3px] border border-border px-3 py-2 text-sm whitespace-nowrap hover:border-foreground lg:rounded-none lg:border-0 lg:px-0 lg:py-3 lg:text-[15px] lg:whitespace-normal lg:hover:text-primary-deep"
+                  >
+                    {s.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </aside>
+
+        {/* Detail blocks */}
+        <div className="lg:col-span-9">
+          {d.services.map((s, i) => {
+            const wa = whatsappLink(d.whatsapp, `Assalam o Alaikum, I'd like to ask about ${s.title} at ${d.businessName}.`);
+            return (
+              <article
+                key={`${s.title}-${i}`}
+                id={slugify(s.title)}
+                className="scroll-mt-32 border-t border-foreground/80 pt-8 pb-14 first:pt-8"
+              >
+                <div className="grid gap-6 md:grid-cols-[4rem_1fr]">
+                  <span className="font-serif text-xl text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                  <div>
+                    <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] leading-tight">{s.title}</h2>
+                    {s.description && <p className="mt-3 text-[18px] leading-relaxed text-foreground/80">{s.description}</p>}
+                    {s.details && s.details !== s.description && (
+                      <div className="mt-6 max-w-[68ch] space-y-4 text-[16px] leading-relaxed text-muted-foreground">
+                        {s.details.split(/\n{2,}/).map((p, j) => (
+                          <p key={j}>{p}</p>
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+                      {wa ? (
+                        <a href={wa} target="_blank" rel="noreferrer" className={btnPrimary}>
+                          Ask about {s.title.length > 26 ? "this treatment" : s.title}
+                        </a>
+                      ) : (
+                        <a href={telLink(d.phone)} className={btnPrimary}>
+                          Call {d.phone}
                         </a>
                       )}
-                      <a
-                        href={telLink(d.phone)}
-                        className="inline-flex items-center gap-2 rounded-full bg-background px-5 py-3 text-sm font-semibold ring-1 ring-border hover:ring-foreground/30"
-                      >
-                        <Phone className="size-4" /> Call
-                      </a>
+                      <Link href={`${basePath}#book`} className={textLink}>
+                        Book a consultation
+                      </Link>
                     </div>
                   </div>
                 </div>
               </article>
-            </Reveal>
-          );
-        })}
-        {d.services.length === 0 && (
-          <p className="rounded-3xl bg-surface p-10 text-center text-muted-foreground ring-1 ring-border">
-            Services coming soon. Call {d.phone} to ask about any treatment.
-          </p>
-        )}
+            );
+          })}
+          {d.services.length === 0 && (
+            <p className="text-muted-foreground">Call {d.phone} to ask about any treatment.</p>
+          )}
+        </div>
       </div>
 
-      <section className="bg-foreground text-background">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-14 md:flex-row md:items-center">
+      <section className="bg-ink text-ink-foreground">
+        <div className={`${container} flex flex-col items-start justify-between gap-8 py-16 md:flex-row md:items-center`}>
           <div>
-            <h2 className="font-display text-4xl tracking-tight md:text-5xl">Not sure what you need?</h2>
-            <p className="mt-2 text-background/70">Book a check-up and we&apos;ll explain your options — no pressure.</p>
+            <p className={eyebrowLight}>Not sure what you need?</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-tight text-white">Start with a check-up.</h2>
           </div>
-          <Link href={`${basePath}#book`} className="rounded-full bg-primary px-6 py-3.5 font-semibold text-primary-foreground hover:bg-primary-deep">
-            {d.ctaText}
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href={`${basePath}#book`} className={btnPrimary}>
+              {d.ctaText}
+            </Link>
+            <a href={telLink(d.phone)} className={btnOutlineLight}>
+              {d.phone}
+            </a>
+          </div>
         </div>
       </section>
     </>

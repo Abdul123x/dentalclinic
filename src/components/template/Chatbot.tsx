@@ -229,25 +229,25 @@ export function Chatbot({ data }: { data: ChatbotData }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close chat" : "Chat with us"}
-        className="fixed right-4 bottom-4 z-[60] grid size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 sm:right-6 sm:bottom-6"
+        className="fixed right-4 bottom-[84px] z-[60] grid size-14 place-items-center rounded-full bg-ink text-ink-foreground shadow-[0_8px_30px_-8px_rgba(0,0,0,.45)] transition-transform hover:scale-105 md:right-6 md:bottom-6"
       >
         {open ? <X className="size-6" /> : <MessageCircle className="size-6" />}
-        {!open && <span className="absolute -top-0.5 -right-0.5 size-3.5 rounded-full bg-accent ring-2 ring-background" />}
+        {!open && <span className="absolute top-0.5 right-0.5 size-3 rounded-full bg-primary ring-2 ring-ink" />}
       </button>
 
       {open && (
         <div
           role="dialog"
           aria-label="Chat assistant"
-          className="animate-pop fixed right-4 bottom-22 z-[60] flex h-[min(560px,calc(100dvh-7rem))] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl ring-1 ring-border sm:right-6 sm:bottom-24"
+          className="animate-pop fixed right-4 bottom-[152px] z-[60] flex h-[min(540px,calc(100dvh-11rem))] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-[6px] bg-surface shadow-[0_24px_60px_-20px_rgba(0,0,0,.4)] ring-1 ring-border md:right-6 md:bottom-24 md:h-[min(560px,calc(100dvh-8rem))]"
         >
-          <div className="flex items-center gap-3 bg-primary px-4 py-3 text-primary-foreground">
-            <div className="grid size-9 place-items-center rounded-xl bg-white/20 font-display">{data.initial}</div>
+          <div className="flex items-center gap-3 bg-ink px-4 py-3.5 text-ink-foreground">
+            <div className="grid size-9 place-items-center border border-white/30 font-serif text-lg">{data.initial}</div>
             <div className="min-w-0 flex-1 leading-tight">
               <div className="truncate font-semibold">{data.businessName}</div>
-              <div className="text-xs opacity-80">Usually replies instantly</div>
+              <div className="text-xs opacity-60">Clinic assistant · replies instantly</div>
             </div>
-            <a href={tel} aria-label="Call the clinic" className="grid size-9 place-items-center rounded-full bg-white/15 hover:bg-white/25">
+            <a href={tel} aria-label="Call the clinic" className="grid size-9 place-items-center rounded-full bg-white/10 hover:bg-white/20">
               <Phone className="size-4" />
             </a>
           </div>
@@ -256,8 +256,8 @@ export function Chatbot({ data }: { data: ChatbotData }) {
             {msgs.map((m, i) => (
               <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-line ${
-                    m.from === "user" ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md bg-surface ring-1 ring-border"
+                  className={`max-w-[85%] rounded-[10px] px-3.5 py-2.5 text-sm whitespace-pre-line ${
+                    m.from === "user" ? "rounded-br-[2px] bg-ink text-ink-foreground" : "rounded-bl-[2px] bg-surface ring-1 ring-border"
                   }`}
                 >
                   {m.text}
@@ -272,7 +272,7 @@ export function Chatbot({ data }: { data: ChatbotData }) {
                               setMsgs((p) => [...p, { from: "user", text: "Book appointment" }]);
                               startBooking();
                             }}
-                            className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground"
+                            className="rounded-[3px] bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground"
                           >
                             {l.label}
                           </button>
@@ -282,7 +282,7 @@ export function Chatbot({ data }: { data: ChatbotData }) {
                             key={l.label}
                             href={l.href}
                             onClick={() => setOpen(false)}
-                            className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary-deep"
+                            className="rounded-[3px] border border-foreground/20 px-2.5 py-1 text-xs font-semibold hover:border-foreground"
                           >
                             {l.label}
                           </Link>
@@ -292,7 +292,7 @@ export function Chatbot({ data }: { data: ChatbotData }) {
                             href={l.href}
                             target={l.href.startsWith("http") ? "_blank" : undefined}
                             rel="noreferrer"
-                            className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary-deep"
+                            className="rounded-[3px] border border-foreground/20 px-2.5 py-1 text-xs font-semibold hover:border-foreground"
                           >
                             {l.label}
                           </a>
@@ -305,7 +305,7 @@ export function Chatbot({ data }: { data: ChatbotData }) {
             ))}
             {typing && (
               <div className="flex">
-                <div className="flex gap-1 rounded-2xl rounded-bl-md bg-surface px-4 py-3 ring-1 ring-border">
+                <div className="flex gap-1 rounded-[10px] rounded-bl-[2px] bg-surface px-4 py-3 ring-1 ring-border">
                   {[0, 150, 300].map((d) => (
                     <span key={d} className="size-1.5 animate-bounce rounded-full bg-muted-foreground" style={{ animationDelay: `${d}ms` }} />
                   ))}
@@ -322,7 +322,7 @@ export function Chatbot({ data }: { data: ChatbotData }) {
                   key={q}
                   type="button"
                   onClick={() => send(q)}
-                  className="shrink-0 rounded-full bg-background px-3 py-1.5 text-xs font-medium ring-1 ring-border hover:ring-primary"
+                  className="shrink-0 rounded-[3px] bg-background px-3 py-1.5 text-xs font-medium ring-1 ring-border hover:ring-foreground"
                 >
                   {q}
                 </button>
@@ -335,9 +335,9 @@ export function Chatbot({ data }: { data: ChatbotData }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={step ? "Type your answer…" : "Type your question…"}
-              className="min-w-0 flex-1 rounded-full bg-background px-4 py-2.5 text-sm ring-1 ring-border outline-none focus:ring-2 focus:ring-primary"
+              className="min-w-0 flex-1 rounded-[3px] bg-background px-4 py-2.5 text-sm ring-1 ring-border outline-none focus:ring-foreground"
             />
-            <button type="submit" aria-label="Send" className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground">
+            <button type="submit" aria-label="Send" className="grid size-10 shrink-0 place-items-center rounded-[3px] bg-primary text-primary-foreground">
               <Send className="size-4" />
             </button>
           </form>

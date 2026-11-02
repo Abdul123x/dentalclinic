@@ -75,6 +75,9 @@ export const demoInputSchema = z.object({
   doctorTitle: optionalText(120),
   doctorBio: optionalText(1000),
   doctorImage: imageUrl,
+  doctorQuote: optionalText(300),
+  doctorExperience: optionalText(40),
+  doctorSpecialties: z.array(trimmed(60)).max(12).default([]).transform((a) => a.filter(Boolean).slice(0, 8)),
   tagline: optionalText(160),
   phone: trimmed(40).min(5, "Phone number is required"),
   whatsapp: z

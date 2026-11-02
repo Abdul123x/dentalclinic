@@ -5,11 +5,11 @@ import { themeVars } from "@/lib/theme";
 import { Chatbot } from "./Chatbot";
 import { mapsSearchUrl } from "./Contact";
 import { Footer } from "./Footer";
-import { Navbar } from "./Navbar";
+import { MobileActionBar, Navbar } from "./Navbar";
 
 /**
  * Wraps every demo page: applies the client's brand colours as CSS variables,
- * and renders the shared navbar, footer and chatbot.
+ * and renders the shared navbar, footer, mobile action bar and chatbot.
  */
 export function DemoShell({
   demo,
@@ -23,11 +23,12 @@ export function DemoShell({
   children: ReactNode;
 }) {
   return (
-    <div style={themeVars(demo.primaryColor, demo.secondaryColor)} className="min-h-screen bg-background font-body text-foreground">
+    <div style={themeVars(demo.primaryColor, demo.secondaryColor)} className="site min-h-screen bg-background text-foreground">
       {banner}
       <Navbar demo={demo} basePath={basePath} />
       <main>{children}</main>
-      <Footer data={demo} />
+      <Footer data={demo} basePath={basePath} />
+      <MobileActionBar demo={demo} basePath={basePath} />
       <Chatbot
         data={{
           businessName: demo.businessName,

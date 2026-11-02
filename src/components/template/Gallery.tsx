@@ -1,24 +1,38 @@
-import { Reveal } from "./Reveal";
-import { SectionLabel } from "./SectionLabel";
+import { container, eyebrow } from "./ui";
 
+/** One large image + smaller ones, like a printed brochure spread. */
 export function Gallery({ images, businessName }: { images: string[]; businessName: string }) {
   if (!images.length) return null;
+  const [first, ...rest] = images;
+  const small = rest.slice(0, 4);
   return (
-    <section id="gallery" className="mx-auto max-w-6xl px-5 py-16">
-      <Reveal>
-        <SectionLabel className="mb-6">Inside the clinic</SectionLabel>
-      </Reveal>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {images.map((src, i) => (
-          <Reveal key={`${src}-${i}`} delay={(i % 4) * 70}>
+    <section id="gallery" className="border-t border-border bg-paper py-20 md:py-28">
+      <div className={container}>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <p className={eyebrow}>The clinic</p>
+          <p className="max-w-md text-[15px] text-muted-foreground">
+            A clean, calm space with sterilised instruments and modern equipment.
+          </p>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-4 md:grid-rows-[280px_280px]">
+          <img
+            src={first}
+            alt={`${businessName} — photo 1`}
+            loading="lazy"
+            className="photo col-span-2 aspect-square w-full rounded-[4px] object-cover md:row-span-2 md:aspect-auto md:h-full"
+          />
+          {small.map((src, i) => (
             <img
+              key={`${src}-${i}`}
               src={src}
-              alt={`${businessName} — photo ${i + 1}`}
+              alt={`${businessName} — photo ${i + 2}`}
               loading="lazy"
-              className="aspect-square w-full rounded-2xl object-cover transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.03]"
+              className={`photo aspect-square w-full rounded-[4px] object-cover md:aspect-auto md:h-full ${
+                small.length === 3 && i === 2 ? "col-span-2 aspect-[2/1]" : ""
+              }`}
             />
-          </Reveal>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

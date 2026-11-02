@@ -68,6 +68,9 @@ export const DEMO_DEFAULTS: DemoInput = {
   doctorTitle: "",
   doctorBio: "",
   doctorImage: "",
+  doctorQuote: "",
+  doctorExperience: "",
+  doctorSpecialties: [],
   tagline: "",
   phone: "",
   whatsapp: "",
@@ -121,7 +124,7 @@ export function resolveDemo(demo: Demo) {
   const where = city ? ` in ${city}` : "";
   return {
     ...demo,
-    heroTitle: demo.heroTitle || "Bright smiles, done gently.",
+    heroTitle: demo.heroTitle || `Modern dental care${where}`,
     heroDescription:
       demo.heroDescription ||
       `${demo.businessName}${where}. Honest, gentle dentistry for the whole family — from cleanings to full smile makeovers.`,

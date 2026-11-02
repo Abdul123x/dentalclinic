@@ -306,9 +306,18 @@ export function DemoForm({
             </div>
             <TextInput label="Doctor name" value={v.doctorName} onChange={(x) => set("doctorName", x)} placeholder="Dr. Sarah Ahmed" hint="Leave empty to hide the doctor section." />
             <TextInput label="Doctor qualifications / role" value={v.doctorTitle} onChange={(x) => set("doctorTitle", x)} placeholder="BDS · Lead Dentist" />
-            <TextArea label="Doctor bio" value={v.doctorBio} onChange={(x) => set("doctorBio", x)} />
+            <TextArea label="Doctor bio" rows={4} value={v.doctorBio} onChange={(x) => set("doctorBio", x)} hint="2–3 sentences about the doctor. Leave a blank line between paragraphs." />
+            <TextArea label="Doctor quote" rows={2} value={v.doctorQuote} onChange={(x) => set("doctorQuote", x)} placeholder="A dental visit should feel calm, not scary." />
+            <TextInput label="Experience" value={v.doctorExperience} onChange={(x) => set("doctorExperience", x)} placeholder="8+ years" hint="Shown as a stat. Leave empty to hide." />
+            <TextInput
+              label="Specialties (comma separated)"
+              value={v.doctorSpecialties.join(", ")}
+              onChange={(x) => set("doctorSpecialties", x.split(",").map((t) => t.trimStart()).slice(0, 12))}
+              placeholder="Dental implants, Teeth whitening, Root canal"
+              hint="Empty = first 4 services."
+            />
             <div className="sm:col-span-2">
-              <ImageInput label="Doctor photo" value={v.doctorImage} onChange={(x) => set("doctorImage", x)} uploadsEnabled={uploadsEnabled} folder={folder} aspect="aspect-[4/5]" hint="Empty = initials avatar." />
+              <ImageInput label="Doctor photo" value={v.doctorImage} onChange={(x) => set("doctorImage", x)} uploadsEnabled={uploadsEnabled} folder={folder} error={err("doctorImage")} aspect="aspect-[4/5]" maxDim={1400} hint="Portrait photo works best." />
             </div>
           </Section>
 
@@ -491,7 +500,7 @@ export function DemoForm({
               ))}
             </div>
             <div className="sm:col-span-2">
-              <ImageInput label="Logo" value={v.logo} onChange={(x) => set("logo", x)} uploadsEnabled={uploadsEnabled} folder={folder} error={err("logo")} aspect="aspect-square" hint="Square PNG/SVG works best. Empty = first letter of the name." />
+              <ImageInput label="Logo" value={v.logo} onChange={(x) => set("logo", x)} uploadsEnabled={uploadsEnabled} folder={folder} error={err("logo")} aspect="aspect-square" maxDim={600} hint="Square PNG works best. Empty = first letter of the name." />
             </div>
             {/* Live colour preview */}
             <div className="flex flex-wrap items-center gap-3 rounded-xl bg-background p-4 ring-1 ring-border sm:col-span-2">
